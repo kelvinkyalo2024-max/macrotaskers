@@ -1,0 +1,650 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07121b">
+<title>Macro taskter$ — Daily Task Hub</title>
+
+<style>
+:root{--bg:#07121b;--panel:#10232d;--panel2:#132b36;--line:#223c48;--text:#f2f6f8;--muted:#9aadb7;--gold:#ffbf69;--mint:#70e2cf}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{position:sticky;top:0;z-index:10;background:#08151eeb;border-bottom:1px solid #20333e;backdrop-filter:blur(12px);padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-weight:900;letter-spacing:.3px;font-size:20px}
+.brand span{color:var(--gold)}
+.brand small{display:block;font-size:9px;letter-spacing:2px;color:var(--muted);font-weight:700}
+nav{display:flex;gap:8px;align-items:center}
+button{border:0;cursor:pointer;font:inherit;font-weight:750;border-radius:14px;padding:12px 16px;transition:.2s}
+button:disabled{opacity:.45;cursor:not-allowed}
+.btn-gold{background:var(--gold);color:#1a1a1a}
+.btn-dark{background:transparent;border:1px solid var(--line);color:var(--text)}
+.btn-mint{background:var(--mint);color:#08211f}
+.btn-small{padding:9px 12px;font-size:13px}
+main{max-width:1050px;margin:auto;padding:22px 18px 60px}
+.hero{padding:28px 4px 20px;text-align:center}
+.eyebrow{color:var(--mint);font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
+h1{font-size:clamp(34px,7vw,60px);line-height:1.03;margin:12px 0}
+.hero p{color:var(--muted);font-size:16px}
+.hero .accent{color:var(--mint)}
+.notice{background:#172b32;border:1px solid #49665d;border-radius:14px;padding:13px 15px;color:#c9d8d8;font-size:12px;line-height:1.6;margin:10px 0 20px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.wallet{background:linear-gradient(140deg,#132b36,#0e202a);border:1px solid var(--line);border-radius:22px;padding:20px;margin:14px 0 18px;display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:center}
+.balance{font-size:clamp(32px,7vw,44px);font-weight:900;color:var(--gold);margin:5px 0}
+.muted{color:var(--muted)}
+.wallet-actions{display:flex;gap:9px;flex-wrap:wrap}
+.stat{background:#10232d;border:1px solid var(--line);border-radius:16px;padding:14px}
+.stat strong{display:block;color:var(--gold);font-size:23px}
+.stat span{font-size:12px;color:var(--muted)}
+.section-title{font-size:23px;margin:28px 0 13px}
+.timerbar{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#10232d;border:1px solid var(--line);padding:14px 16px;border-radius:16px;margin:12px 0 16px}
+.timer{font-variant-numeric:tabular-nums;color:var(--gold);font-size:20px;font-weight:900}
+.day-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:19px;position:relative;overflow:hidden}
+.day-card.active{border-color:var(--day-accent);box-shadow:0 0 0 1px color-mix(in srgb,var(--day-accent),transparent 70%)}
+.day-card.locked{opacity:.55}
+.day-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.day-number{background:color-mix(in srgb,var(--day-accent),transparent 84%);border:1px solid color-mix(in srgb,var(--day-accent),transparent 55%);color:var(--day-accent);padding:9px 12px;border-radius:12px;font-weight:900}
+.day-card h3{margin:15px 0 5px}
+.day-card p{color:var(--muted);font-size:13px;line-height:1.55}
+.progress{height:7px;background:#243b45;border-radius:10px;overflow:hidden;margin:14px 0 8px}
+.progress span{display:block;height:100%;background:var(--day-accent);width:0}
+.task-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.task{background:#0d2029;border:1px solid #27404b;border-radius:14px;padding:13px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.task.done{border-color:#3e897b}
+.task strong{font-size:13px}
+.task small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+.foot{color:#718590;font-size:11px;text-align:center;padding:24px 0}
+.modal-backdrop{position:fixed;inset:0;background:#000b;z-index:30;display:none;align-items:center;justify-content:center;padding:16px}
+.modal{background:#10232d;border:1px solid #35515d;border-radius:22px;padding:21px;width:min(520px,100%);max-height:90vh;overflow:auto}
+.modal h2{margin:5px 0 8px}
+.field{width:100%;background:#071820;border:1px solid #34505d;color:white;padding:13px;border-radius:12px;font:inherit;margin:8px 0 12px;outline:none}
+.field:focus{border-color:var(--mint)}
+.options{display:grid;gap:9px;margin:15px 0}
+.option{border:1px solid #35505c;background:#0b1d26;border-radius:12px;padding:12px;text-align:left;color:var(--text);font-weight:600}
+.option.selected{border-color:var(--mint);background:#143b3b}
+.feedback{padding:12px;border-radius:12px;margin:12px 0;display:none;line-height:1.5}
+.success{background:#123d35;color:#baf5df}
+.error{background:#4a2829;color:#ffd4d4}
+@media(max-width:650px){
+.grid{grid-template-columns:1fr}
+.wallet{grid-template-columns:1fr}
+.task-list{grid-template-columns:1fr}
+header{padding:12px}
+.brand{font-size:17px}
+nav button{padding:10px 11px;font-size:12px}
+.timerbar{align-items:flex-start;flex-direction:column}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+ <div class="brand">MACRO <span>taskter$</span><small>DAILY SKILL & TASK HUB</small></div>
+ <nav>
+  <button class="btn-dark btn-small" onclick="document.getElementById('wallet').scrollIntoView({behavior:'smooth'})">Wallet</button>
+  <button class="btn-gold btn-small" onclick="document.getElementById('days').scrollIntoView({behavior:'smooth'})">Start tasks</button>
+ </nav>
+</header>
+
+<main>
+
+<section class="hero">
+ <div class="eyebrow">7 days · 70 practical challenges</div>
+ <h1>Learn. Complete.<br><span class="accent">Keep moving.</span></h1>
+ <p>One new daily tier, ten short interactive tasks, and a fresh countdown every midnight.share link for referals and contact admin to claim ksh 50 referal bonus.</p>
+</section>
+
+<section id="wallet" class="wallet">
+
+ <div>
+  <div class="muted">Wallet balance</div>
+  <div class="balance" id="balance">KSh 0</div>
+  <div class="muted" id="earnedText">Complete tasks to build your balance.</div>
+ </div>
+
+ <div>
+  <h3 style="margin-top:0">Withdraw funds</h3>
+
+  <input
+   class="field"
+   id="withdrawAmount"
+   type="number"
+   min="1"
+   placeholder="Enter withdrawal amount (KSh)"
+  >
+
+  <input
+   class="field"
+   id="safaricomNumber"
+   type="tel"
+   maxlength="10"
+   inputmode="numeric"
+   placeholder="Safaricom number (07XXXXXXXX)"
+  >
+
+  <button class="btn-gold" onclick="withdraw()" style="width:100%">
+   Withdraw
+  </button>
+
+  <p class="muted" id="withdrawNote" style="font-size:12px">
+   Withdrawals are scheduled for Sunday.
+  </p>
+
+ </div>
+
+</section>
+
+<div class="grid">
+ <div class="stat"><strong id="completedStat">0 / 70</strong><span>Tasks completed this session</span></div>
+</div>
+
+<div class="timerbar">
+ <div>
+  <b id="todayLabel">Today's tier</b>
+  <div class="muted" style="font-size:12px">Next tier begins at local midnight</div>
+ </div>
+ <div class="timer" id="countdown">00:00:00</div>
+</div>
+
+<h2 class="section-title" id="days">Your weekly tiers</h2>
+<div class="grid" id="dayGrid"></div>
+
+<div class="foot">Macro taskter$ · Device local time.</div>
+
+</main>
+
+<div class="modal-backdrop" id="modalBackdrop">
+ <div class="modal" role="dialog" aria-modal="true">
+
+  <div class="eyebrow" id="modalDay">DAILY TASK</div>
+  <h2 id="modalTitle">Task</h2>
+  <p class="muted" id="modalDesc"></p>
+
+  <div id="codeStage">
+   <label for="accessCode">Enter the 4-digit task access code</label>
+   <input class="field" id="accessCode" inputmode="numeric" maxlength="4" placeholder="4-digit code">
+
+   <div class="wallet-actions">
+    <button class="btn-gold" onclick="unlockTask()">Open task</button>
+    <button class="btn-dark" onclick="contactAdmin()">Contact admin for code</button>
+   </div>
+  </div>
+
+  <div id="quizStage" style="display:none">
+   <div class="notice" id="typeLabel"></div>
+   <p id="questionText" style="font-weight:750;line-height:1.5"></p>
+
+   <button class="btn-dark btn-small" id="audioBtn" onclick="playAudio()" style="display:none">▶ Play audio clue</button>
+
+   <div class="options" id="options"></div>
+   <div class="feedback" id="quizFeedback"></div>
+
+   <button class="btn-gold" id="submitBtn" onclick="submitTask()" style="width:100%">Complete & submit</button>
+  </div>
+
+  <div class="wallet-actions" style="margin-top:16px">
+   <button class="btn-dark" onclick="closeModal()">Close</button>
+  </div>
+
+ </div>
+</div>
+
+<script>
+
+const DAYS = [
+ ["Monday","Clarity Monday","#244a58","#76d6c8","Focus & communication"],
+ ["Tuesday","Skill Tuesday","#4b3c5f","#b9a0e8","Digital and practical skills"],
+ ["Wednesday","Wisdom Wednesday","#4c4935","#d7c27a","Reasoning & everyday decisions"],
+ ["Thursday","Tech Thursday","#254b46","#82cdb0","Technology & digital safety"],
+ ["Friday","Finance Friday","#51402e","#e2b16e","Money and numeracy"],
+ ["Saturday","Creative Saturday","#4c3548","#d99fc3","Creativity & observation"],
+ ["Sunday","Review Sunday","#35445b","#9db9e6","Weekly review & problem-solving"]
+];
+
+const TASKS = [
+
+[
+{id:"d1q1",code:"4862",q:"A clear work message should usually begin with…",opts:["The main point","A long unrelated story","Several emojis","An unclear hint"],answer:0,type:"text"},
+{id:"d1q2",code:"6841",q:"You receive an instruction you do not understand. What is best?",opts:["Guess and submit","Ask a focused clarification","Ignore it","Copy someone else's work"],answer:1,type:"text"},
+{id:"d1q3",code:"2377",q:"Which is the clearest deadline format?",opts:["Soon","Later","14:00 on 12 Nov","When possible"],answer:2,type:"text"},
+{id:"d1q4",code:"5277",q:"Choose the best file name for a report.",opts:["finalfinal2","Report_RAD2322_12Nov","new document","stuff"],answer:1,type:"visual"},
+{id:"d1q5",code:"2778",q:"A colleague points out an error. Your best first response?",opts:["Check and correct it","Delete the message","Blame someone","Argue immediately"],answer:0,type:"text"},
+{id:"d1q6",code:"9650",q:"Which note is easiest to act on?",opts:["Do the thing","Call supplier at 10:00; confirm delivery","Remember stuff","Maybe later"],answer:1,type:"text"},
+{id:"d1q7",code:"7234",q:"A message sounds rude but may be unclear. What should you do?",opts:["Assume the worst","Reply with an insult","Ask politely what they meant","Share it publicly"],answer:2,type:"text"},
+{id:"d1q8",code:"4023",q:"Which order makes a useful checklist?",opts:["Random order","Urgent tasks first, then routine tasks","Only easy tasks","No order"],answer:1,type:"visual"},
+{id:"d1q9",code:"2058",q:"You have 30 minutes and three tasks. What helps most?",opts:["Estimate time and prioritize","Start all at once","Wait until the end","Skip planning"],answer:0,type:"text"},
+{id:"d1q10",code:"2949",q:"Which is a good proofread habit?",opts:["Read once very fast","Check names, numbers and punctuation","Only check the title","Trust autocorrect completely"],answer:1,type:"audio"}
+],
+
+[
+{id:"d2q1",code:"9622",q:"A strong password is best described as…",opts:["Your first name","12345678","Long, unique and hard to guess","The word password"],answer:2,type:"text"},
+{id:"d2q2",code:"2939",q:"What should you do before opening an unexpected attachment?",opts:["Check sender and context","Open it quickly","Forward to everyone","Disable security"],answer:0,type:"text"},
+{id:"d2q3",code:"3516",q:"Which shortcut commonly copies selected text?",opts:["Ctrl + V","Ctrl + C","Ctrl + Z","Ctrl + P"],answer:1,type:"visual"},
+{id:"d2q4",code:"6257",q:"A spreadsheet cell shows ####. What is a likely fix?",opts:["Widen the column","Delete the sheet","Turn off the computer","Change every value"],answer:0,type:"text"},
+{id:"d2q5",code:"6847",q:"What does a URL beginning with https indicate?",opts:["The site is guaranteed honest","Connection is encrypted","The site is free","No login is needed"],answer:1,type:"text"},
+{id:"d2q6",code:"2424",q:"You need to find a word in a long document. Use…",opts:["Ctrl + F","Ctrl + S","Ctrl + N","Ctrl + X"],answer:0,type:"visual"},
+{id:"d2q7",code:"5995",q:"Which is the safest way to share a document?",opts:["Public link for everyone","Give access only to intended people","Post your password","Use a stranger's account"],answer:1,type:"text"},
+{id:"d2q8",code:"5110",q:"What is a backup?",opts:["A second copy of important data","A brighter screen","A new password","A deleted file"],answer:0,type:"text"},
+{id:"d2q9",code:"9620",q:"An app asks for contacts and microphone access for no clear reason. Best action?",opts:["Grant everything","Review and deny unnecessary permissions","Share the app password","Ignore all warnings"],answer:1,type:"text"},
+{id:"d2q10",code:"5459",q:"What does a strong search query contain?",opts:["Relevant specific keywords","Only punctuation","A full unrelated paragraph","Random letters"],answer:0,type:"audio"}
+],
+
+[
+{id:"d3q1",code:"8137",q:"A shop gives 10% off KSh 2,000. What is the discount?",opts:["KSh 20","KSh 100","KSh 200","KSh 1,000"],answer:2,type:"text"},
+{id:"d3q2",code:"4105",q:"You have 45 minutes before a meeting. It is 09:20. Meeting time?",opts:["09:55","10:05","10:15","10:45"],answer:1,type:"text"},
+{id:"d3q3",code:"7751",q:"Which is an example of a reliable source?",opts:["An anonymous forwarded claim","A dated official report","A random comment","A cropped screenshot"],answer:1,type:"text"},
+{id:"d3q4",code:"7440",q:"A pattern goes ▲ ● ▲ ● ▲ … What comes next?",opts:["▲","●","■","★"],answer:1,type:"visual"},
+{id:"d3q5",code:"6206",q:"You are unsure whether a claim is true. First step?",opts:["Share it","Check independent credible sources","Add a dramatic caption","Assume it is true"],answer:1,type:"text"},
+{id:"d3q6",code:"6160",q:"A task has 4 steps and each takes 5 minutes. Total time?",opts:["9 minutes","15 minutes","20 minutes","25 minutes"],answer:2,type:"text"},
+{id:"d3q7",code:"1614",q:"Which is the fairest way to resolve a disagreement?",opts:["Listen to both sides","Interrupt constantly","Spread rumours","Refuse all discussion"],answer:0,type:"text"},
+{id:"d3q8",code:"3885",q:"A medicine label says take with food. What should guide you?",opts:["A guess","The label and qualified health advice","A social media post","A friend's unrelated dose"],answer:1,type:"text"},
+{id:"d3q9",code:"4858",q:"Which is a sensible emergency response?",opts:["Stay calm and contact appropriate help","Hide the incident","Crowd the scene","Post before helping"],answer:0,type:"text"},
+{id:"d3q10",code:"1806",q:"Audio clue: the spoken number is twenty-four. Which number is it?",opts:["14","20","24","42"],answer:2,type:"audio"}
+],
+
+[
+{id:"d4q1",code:"9384",q:"A public Wi-Fi network is safest for sensitive banking when…",opts:["You use any open network","You avoid sensitive transactions or use trusted protection","You share your PIN","You turn off screen lock"],answer:1,type:"text"},
+{id:"d4q2",code:"9747",q:"What is phishing?",opts:["A fraudulent attempt to steal information","A computer update","A file backup","A keyboard shortcut"],answer:0,type:"text"},
+{id:"d4q3",code:"8811",q:"Which is a common sign of a scam message?",opts:["Verified contact details","Urgent pressure and suspicious links","Clear official process","No request for money"],answer:1,type:"visual"},
+{id:"d4q4",code:"1857",q:"What should you do with a one-time password (OTP)?",opts:["Post it","Tell callers who ask","Keep it private","Use it as your public username"],answer:2,type:"text"},
+{id:"d4q5",code:"2339",q:"Why install software updates?",opts:["They may fix security flaws","They always delete files","They expose all passwords","They stop backups"],answer:0,type:"text"},
+{id:"d4q6",code:"5088",q:"A QR code is on an unknown poster. Best practice?",opts:["Scan without checking","Check the destination before entering details","Enter your PIN immediately","Send it to strangers"],answer:1,type:"text"},
+{id:"d4q7",code:"5440",q:"Which is the safer browser habit?",opts:["Ignore certificate warnings","Check the domain carefully","Save passwords on public PCs","Download every pop-up"],answer:1,type:"text"},
+{id:"d4q8",code:"8884",q:"What does two-factor authentication add?",opts:["A second verification step","A second username only","Unlimited data","Automatic refunds"],answer:0,type:"visual"},
+{id:"d4q9",code:"6736",q:"You lose a phone with logged-in accounts. What should you do first?",opts:["Secure accounts and use device-lock tools","Wait a month","Share the SIM PIN","Post account details"],answer:0,type:"text"},
+{id:"d4q10",code:"3142",q:"Audio clue: the spoken word is 'update'. What is it?",opts:["Upload","Update","Outdated","Output"],answer:1,type:"audio"}
+],
+
+[
+{id:"d5q1",code:"4678",q:"You earn KSh 1,500 and save 20%. How much do you save?",opts:["KSh 150","KSh 200","KSh 300","KSh 500"],answer:2,type:"text"},
+{id:"d5q2",code:"7566",q:"A budget is mainly used to…",opts:["Track income and planned spending","Guarantee wealth","Avoid all expenses","Replace receipts"],answer:0,type:"text"},
+{id:"d5q3",code:"1879",q:"Which is a need rather than a want?",opts:["Basic food","A luxury watch","A new game","Premium headphones"],answer:0,type:"visual"},
+{id:"d5q4",code:"3183",q:"You spend KSh 250 daily for 4 days. Total?",opts:["KSh 500","KSh 750","KSh 1,000","KSh 1,250"],answer:2,type:"text"},
+{id:"d5q5",code:"2990",q:"What is the safest approach to a promised guaranteed high return?",opts:["Send money immediately","Verify the provider and be cautious","Borrow to invest","Share your PIN"],answer:1,type:"text"},
+{id:"d5q6",code:"6712",q:"A receipt helps you…",opts:["Record and verify a transaction","Increase your balance","Guarantee a refund","Avoid budgeting"],answer:0,type:"text"},
+{id:"d5q7",code:"1706",q:"If income is KSh 5,000 and expenses KSh 4,200, what remains?",opts:["KSh 600","KSh 700","KSh 800","KSh 900"],answer:2,type:"text"},
+{id:"d5q8",code:"6247",q:"Which is a useful savings habit?",opts:["Save a planned amount regularly","Save only by accident","Spend first without tracking","Ignore goals"],answer:0,type:"text"},
+{id:"d5q9",code:"2508",q:"A loan's total cost can include…",opts:["Interest and fees","Only the advertised amount","A free bonus","No repayment"],answer:0,type:"text"},
+{id:"d5q10",code:"1301",q:"Audio clue: the spoken amount is three hundred shillings. Choose it.",opts:["KSh 30","KSh 130","KSh 300","KSh 3,000"],answer:2,type:"audio"}
+],
+
+[
+{id:"d6q1",code:"7737",q:"Which colour combination has strong readable contrast?",opts:["Pale grey on white","Dark navy on cream","Yellow on white","Light blue on pale grey"],answer:1,type:"visual"},
+{id:"d6q2",code:"1671",q:"A useful poster should have…",opts:["One clear message and readable text","Ten competing headlines","Tiny low-contrast text","No spacing"],answer:0,type:"text"},
+{id:"d6q3",code:"6281",q:"You need a simple idea for a reusable item. Best choice?",opts:["Disposable packaging","A refillable bottle","Single-use cups","Extra plastic bags"],answer:1,type:"text"},
+{id:"d6q4",code:"7082",q:"Which image crop best suits a profile portrait?",opts:["Keep the face visible with some space","Cut through the eyes","Hide the subject","Stretch the face"],answer:0,type:"visual"},
+{id:"d6q5",code:"6161",q:"A short presentation is clearer when slides…",opts:["Use one main idea each","Contain full essays","Use many fonts","Have no headings"],answer:0,type:"text"},
+{id:"d6q6",code:"7129",q:"Which is an example of constructive feedback?",opts:["This is useless","The heading is clear; increase body-text contrast","You never do anything right","No comment"],answer:1,type:"text"},
+{id:"d6q7",code:"3661",q:"You are brainstorming. What helps generate ideas?",opts:["Write several possibilities before judging","Reject every first idea","Wait for perfection","Copy without thinking"],answer:0,type:"text"},
+{id:"d6q8",code:"6146",q:"A photo looks blurry. What is a good first fix?",opts:["Use a sharper original image","Stretch it larger","Add more blur","Compress repeatedly"],answer:0,type:"text"},
+{id:"d6q9",code:"5295",q:"Which layout is easiest to scan?",opts:["Clear headings and consistent spacing","Random alignment","One dense paragraph","Different style on every line"],answer:0,type:"visual"},
+{id:"d6q10",code:"4067",q:"Audio clue: the spoken word is 'create'. Select the matching word.",opts:["Creator","Create","Crate","Creative"],answer:1,type:"audio"}
+],
+
+[
+{id:"d7q1",code:"8828",q:"You completed 6 tasks worth 300 points each. Total?",opts:["KSh 900","KSh 1,200","KSh 1,800","KSh 2,400"],answer:2,type:"text"},
+{id:"d7q2",code:"9230",q:"What should you check before submitting work?",opts:["Instructions and completeness","Only the colour","Nothing","Someone else's password"],answer:0,type:"text"},
+{id:"d7q3",code:"7802",q:"Which is the best weekly review question?",opts:["What worked and what needs improving?","Who can I blame?","How do I avoid planning?","Can I delete my goals?"],answer:0,type:"text"},
+{id:"d7q4",code:"4350",q:"A task is overdue. Best next step?",opts:["Communicate, reset a realistic plan","Pretend it is done","Hide the issue","Submit empty work"],answer:0,type:"text"},
+{id:"d7q5",code:"4952",q:"A sequence is 2, 4, 6, 8, … What comes next?",opts:["9","10","11","12"],answer:1,type:"visual"},
+{id:"d7q6",code:"7027",q:"Which detail should never be shared publicly?",opts:["A public business address","Your account password","A public event time","A published article title"],answer:1,type:"text"},
+{id:"d7q7",code:"6803",q:"A person asks you to pay a fee to unlock a promised job. Best response?",opts:["Pay without checking","Verify independently; be wary of pay-to-work claims","Send your ID and PIN","Borrow immediately"],answer:1,type:"text"},
+{id:"d7q8",code:"5093",q:"Which makes a good goal?",opts:["Specific and measurable","Impossible to measure","Always changing","Only a vague wish"],answer:0,type:"text"},
+{id:"d7q9",code:"7597",q:"You notice an error in a submitted form. What is best?",opts:["Contact the responsible admin with details","Create duplicate fake records","Ignore it forever","Alter unrelated data"],answer:0,type:"text"},
+{id:"d7q10",code:"2494",q:"Audio clue: the spoken day is Sunday. Which day was spoken?",opts:["Saturday","Sunday","Monday","Friday"],answer:1,type:"audio"}
+]
+
+];
+
+const ADMIN_WA = "254786854599";
+const STORAGE_KEY = "macro_taskter_session_v1";
+
+let state={completed:[],balance:0};
+let currentTask=null;
+let selectedAnswer=null;
+let unlocked=false;
+
+function loadSession(){
+ try{
+  const raw=sessionStorage.getItem(STORAGE_KEY);
+  if(raw)state={...state,...JSON.parse(raw)};
+ }catch(e){}
+}
+
+function saveSession(){
+ sessionStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+}
+
+function todayIndex(){
+ return (new Date().getDay()+6)%7;
+}
+
+function dayStart(){
+ const n=new Date();
+ n.setHours(24,0,0,0);
+ return n;
+}
+
+function updateCountdown(){
+ const now=new Date();
+ const diff=Math.max(0,dayStart()-now);
+
+ const h=String(Math.floor(diff/3600000)).padStart(2,"0");
+ const m=String(Math.floor(diff%3600000/60000)).padStart(2,"0");
+ const s=String(Math.floor(diff%60000/1000)).padStart(2,"0");
+
+ document.getElementById("countdown").textContent=`${h}:${m}:${s}`;
+
+ const d=todayIndex();
+
+ document.getElementById("todayLabel").textContent=
+ `${DAYS[d][0]} · ${DAYS[d][1]}`;
+}
+
+function render(){
+
+ const active=todayIndex();
+ const grid=document.getElementById("dayGrid");
+
+ grid.innerHTML="";
+
+ DAYS.forEach((d,i)=>{
+
+  const done=TASKS[i].filter(
+   t=>state.completed.includes(t.id)
+  ).length;
+
+  const card=document.createElement("article");
+
+  card.className="day-card "+(i===active?"active":"locked");
+
+  card.style.setProperty("--day-accent",d[3]);
+
+  card.innerHTML=`
+   <div class="day-top">
+    <span class="day-number">0${i+1}</span>
+    <span class="muted" style="font-size:11px">${done}/10 complete</span>
+   </div>
+
+   <h3>${d[1]}</h3>
+   <p>${d[4]} · ${d[0]}</p>
+
+   <div class="progress">
+    <span style="width:${done*10}%"></span>
+   </div>
+
+   <button class="${i===active?"btn-gold":"btn-dark"} btn-small"
+    ${i!==active?"disabled":""}
+    onclick="showTasks(${i})">
+    ${i===active?"Open today's tier":"Available on "+d[0]}
+   </button>
+  `;
+
+  grid.appendChild(card);
+ });
+
+ document.getElementById("balance").textContent=
+ "KSh "+state.balance.toLocaleString("en-KE");
+
+ document.getElementById("completedStat").textContent=
+ state.completed.length+" / 70";
+
+ document.getElementById("earnedText").textContent=
+ state.completed.length+" completed task(s) × KSh 300 task credit";
+}
+
+function showTasks(day){
+
+ if(day!==todayIndex())return;
+
+ const d=DAYS[day];
+ const container=document.getElementById("dayGrid");
+
+ const existing=document.getElementById("taskPanel");
+
+ if(existing)existing.remove();
+
+ const panel=document.createElement("section");
+
+ panel.id="taskPanel";
+ panel.className="day-card";
+ panel.style.gridColumn="1 / -1";
+ panel.style.setProperty("--day-accent",d[3]);
+
+ panel.innerHTML=`
+  <div class="day-top">
+   <div>
+    <div class="eyebrow">${d[0]} · DAILY CHALLENGES</div>
+    <h2 style="margin:6px 0">${d[1]}</h2>
+   </div>
+   <span class="day-number">10 TASKS</span>
+  </div>
+
+  <p>Each task opens with its own 4-digit access code. Complete and submit each task once.</p>
+
+  <div class="task-list" id="taskList"></div>
+ `;
+
+ container.appendChild(panel);
+
+ const list=panel.querySelector("#taskList");
+
+ TASKS[day].forEach((t,i)=>{
+
+  const done=state.completed.includes(t.id);
+
+  const el=document.createElement("div");
+
+  el.className="task "+(done?"done":"");
+
+  el.innerHTML=`
+   <div>
+    <strong>${String(i+1).padStart(2,"0")} · ${done?"Completed":"Challenge "+(i+1)}</strong>
+    <small>${t.type==="audio"?"Audio clue":t.type==="visual"?"Visual reasoning":"Text challenge"} · ${done?"Submitted":"KSh 300 task credit"}</small>
+   </div>
+
+   <button class="${done?"btn-dark":"btn-gold"} btn-small"
+    ${done?"disabled":""}>
+    ${done?"Done":"Open"}
+   </button>
+  `;
+
+  if(!done){
+   el.querySelector("button").onclick=()=>openTask(day,i);
+  }
+
+  list.appendChild(el);
+ });
+
+ panel.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function openTask(day,index){
+
+ currentTask=TASKS[day][index];
+ selectedAnswer=null;
+ unlocked=false;
+
+ document.getElementById("modalDay").textContent=
+ DAYS[day][0].toUpperCase()+" · TASK "+(index+1);
+
+ document.getElementById("modalTitle").textContent=
+ "Challenge "+(index+1);
+
+ document.getElementById("modalDesc").textContent=
+ "Enter the access code to open this task.";
+
+ document.getElementById("accessCode").value="";
+
+ document.getElementById("codeStage").style.display="block";
+ document.getElementById("quizStage").style.display="none";
+
+ document.getElementById("modalBackdrop").style.display="flex";
+}
+
+function unlockTask(){
+
+ const entered=document.getElementById("accessCode").value.trim();
+
+ if(!/^\d{4}$/.test(entered)){
+  alert("Enter a valid 4-digit code.");
+  return;
+ }
+
+ if(entered!==currentTask.code){
+  alert("That code is not correct. Contact admin if you need the task code.");
+  return;
+ }
+
+ unlocked=true;
+
+ document.getElementById("codeStage").style.display="none";
+ document.getElementById("quizStage").style.display="block";
+
+ document.getElementById("questionText").textContent=currentTask.q;
+
+ document.getElementById("typeLabel").textContent=
+ currentTask.type==="audio"
+ ? "AUDIO TASK · Listen to the clue, then choose an answer."
+ : currentTask.type==="visual"
+ ? "VISUAL TASK · Observe the symbols or choices carefully."
+ : "TEXT TASK · Read the question and choose the best answer.";
+
+ document.getElementById("audioBtn").style.display=
+ currentTask.type==="audio"?"inline-block":"none";
+
+ const opts=document.getElementById("options");
+ opts.innerHTML="";
+
+ currentTask.opts.forEach((o,i)=>{
+
+  const b=document.createElement("button");
+  b.className="option";
+  b.textContent=String.fromCharCode(65+i)+". "+o;
+
+  b.onclick=()=>{
+   selectedAnswer=i;
+   [...opts.children].forEach(x=>x.classList.remove("selected"));
+   b.classList.add("selected");
+  };
+
+  opts.appendChild(b);
+ });
+
+ document.getElementById("quizFeedback").style.display="none";
+ document.getElementById("submitBtn").disabled=false;
+}
+
+function playAudio(){
+
+ if(!("speechSynthesis" in window)){
+  alert("Audio playback is not supported by this browser.");
+  return;
+ }
+
+ const utter=new SpeechSynthesisUtterance(currentTask.q);
+ utter.rate=.9;
+
+ window.speechSynthesis.cancel();
+ window.speechSynthesis.speak(utter);
+}
+
+function submitTask(){
+
+ if(!unlocked||selectedAnswer===null){
+  alert("Choose an answer before submitting.");
+  return;
+ }
+
+ const fb=document.getElementById("quizFeedback");
+ fb.style.display="block";
+
+ if(selectedAnswer!==currentTask.answer){
+
+  fb.className="feedback error";
+  fb.textContent="Not quite. Review the question and try again.";
+  return;
+ }
+
+ if(!state.completed.includes(currentTask.id)){
+
+  state.completed.push(currentTask.id);
+  state.balance+=300;
+
+  saveSession();
+  render();
+ }
+
+ fb.className="feedback success";
+
+ fb.textContent=
+ "Submission successful! Please take a screenshot and send it to admin for verification and tracking. Your task has been marked complete in this browser session.";
+
+ document.getElementById("submitBtn").disabled=true;
+}
+
+function contactAdmin(){
+
+ const msg=encodeURIComponent(
+  "Hello admin, I need the 4-digit access code for Macro taskter$ "+
+  (currentTask?currentTask.id:"a task")+"."
+ );
+
+ window.open("https://wa.me/"+ADMIN_WA+"?text="+msg,"_blank");
+}
+
+function closeModal(){
+
+ document.getElementById("modalBackdrop").style.display="none";
+
+ if(window.speechSynthesis){
+  window.speechSynthesis.cancel();
+ }
+
+ currentTask=null;
+}
+
+function withdraw(){
+
+ const amountInput=document.getElementById("withdrawAmount");
+ const phoneInput=document.getElementById("safaricomNumber");
+
+ const amount=Number(amountInput.value);
+ const phone=phoneInput.value.trim();
+
+ if(!amountInput.value||!Number.isFinite(amount)||amount<=0){
+  alert("Please enter a valid withdrawal amount.");
+  return;
+ }
+
+ if(!/^07\d{8}$/.test(phone)){
+  alert("Please enter a valid Safaricom number in the format 07XXXXXXXX.");
+  return;
+ }
+
+ if(amount>state.balance){
+  alert("Insufficient wallet balance.");
+  return;
+ }
+
+ alert("Withdrawal on Sunday");
+
+}
+
+// INITIALIZE WEBSITE
+
+loadSession();
+render();
+updateCountdown();
+
+setInterval(updateCountdown,1000);
+
+document.getElementById("modalBackdrop").addEventListener("click",e=>{
+ if(e.target.id==="modalBackdrop")closeModal();
+});
+
+</script>
+</body>
+</html>
